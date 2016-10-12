@@ -150,12 +150,12 @@ def open_file():
 	gtk.main()
 
 
-def to_html(swf):
+def to_html(swf, button):
 	html_template = """
 <!DOCTYPE HTML>
 <html>
 <head>
-	<meta charset="UTF-8"/>
+	<meta charset="UTF-8" />
 	<style type="text/css" media="screen">
 		html,body,.flash {{
 			margin:0px;
@@ -194,11 +194,15 @@ def to_html(swf):
 		<param name="allowFullScreen" value="true" />
 		<param name="wmode" value="transparent" />
 	</object>
-	<input class="button" type="button" value="关闭窗口" onClick="closeWindow()">
+	{close_button}
 </body>
 </html>
 """
-	return html_template.format(swf=swf)
+	close_button = '<input class="button" type="button" value="关闭窗口" onClick="closeWindow()" />'
+	if button == True:
+		return html_template.format(swf=swf, close_button=close_button)
+	else:
+		return html_template.format(swf=swf, close_button='')
 
 
 def pre_play(swf):
@@ -211,7 +215,6 @@ def pre_play(swf):
 	play_args['width'] = swf_info['width']
 	play_args['height'] = swf_info['height']
 	play_args['base'] = 'file://'+dir_path+'/'
-	play_args['html'] = to_html(play_args['swf_file'])
 	play_args['title'] = play_args['swf_file']
 
 	opt_map = {
@@ -226,13 +229,20 @@ def pre_play(swf):
 			play_args['title'] = False
 		elif opt in ('-X', '-Y', '-j', '-k'):
 			play_args[opt_map.get(opt, 'Pass')] = int(arg)
+
+	if play_args['title'] == False:
+		play_args['html'] = to_html(play_args['swf_file'], True)
+	else:
+		play_args['html'] = to_html(play_args['swf_file'], False)
+
+
 	return play_args
 
 
 if __name__ == "__main__":
-	try:  
+	try:
 		opts,args = getopt.getopt(sys.argv[1:], "X:Y:j:k:", ["hide-menubar"])
-	except getopt.GetoptError:  
+	except getopt.GetoptError:
 		print("getopt error!")
 		sys.exit(1)
 

@@ -1,0 +1,243 @@
+#!/usr/bin/env python2
+# -*- coding: UTF-8 -*-
+
+# date: 2016-10-12
+# version: 0.1.4
+# author: nanpuyue <nanpuyue@gmail.com>, https://blog.nanpuyue.com
+# license: GPL 3.0, https://www.gnu.org/licenses/gpl-3.0.html
+# thanks: Kai Lautaportti, https://pypi.python.org/pypi/hexagonit.swfheader/1.2
+
+import pygtk; pygtk.require('2.0')
+import gtk, webkit, sys, getopt, os.path, zlib, struct
+
+def swfheader(input):
+	header = {}
+	need_close = False
+
+	if hasattr(input, 'read'):
+		input.seek(0)
+	else:
+		input = open(input, 'rb')
+		need_close = True
+
+	def read_ui8(c):
+		return struct.unpack('<B', c)[0]
+	def read_ui16(c):
+		return struct.unpack('<H', c)[0]
+	def read_ui32(c):
+		return struct.unpack('<I', c)[0]
+
+	signature = ''.join(struct.unpack('<3c', input.read(3)))
+	if signature not in ('FWS', 'CWS'):
+		raise ValueError('Invalid SWF signature: %s' % signature)
+
+	header['compressed'] = signature.startswith('C')
+	header['version'] = read_ui8(input.read(1))
+	header['size'] = read_ui32(input.read(4))
+
+	buffer = input.read(header['size'])
+	if header['compressed']:
+		buffer = zlib.decompress(buffer)
+	nbits = read_ui8(buffer[0]) >> 3
+	current_byte, buffer = read_ui8(buffer[0]), buffer[1:]
+	bit_cursor = 5
+
+	for item in 'xmin', 'xmax', 'ymin', 'ymax':
+		value = 0
+		for value_bit in range(nbits - 1, -1, -1):
+			if (current_byte << bit_cursor) & 0x80:
+				value |= 1 << value_bit
+			bit_cursor += 1
+
+			if bit_cursor > 7:
+				current_byte, buffer = read_ui8(buffer[0]), buffer[1:]
+				bit_cursor = 0
+		header[item] = value / 20
+
+	header['width'] = header['xmax'] - header['xmin']
+	header['height'] = header['ymax'] - header['ymin']
+
+	if need_close:
+		input.close()
+	return header
+
+
+def main_window(title, width, height):
+	window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+	window.set_position(gtk.WIN_POS_CENTER)
+	window.connect('destroy', lambda x: gtk.main_quit())
+	window.set_size_request(width, height)
+	window.set_resizable(True)
+
+	if title == False:
+		window.set_decorated(False)
+	else:
+		window.set_title(title)
+
+	return window
+
+
+def create_webview():
+	webview = webkit.WebView()
+	webview.connect('close-web-view', lambda x: gtk.main_quit())
+	settings = webview.get_settings()
+	settings.set_property('enable_plugins', True)
+	settings.set_property('enable-scripts', True)
+	return webview
+
+
+def move_center(window, width, height):
+	screen_width = gtk.gdk.screen_width()
+	screen_height = gtk.gdk.screen_height()
+	new_x = (screen_width - width)/2
+	new_y = (screen_height - height)/2
+	window.move(new_x, new_y)
+
+
+def display_html(window, args):
+	webview = create_webview()
+	webview.load_string(args['html'], 'text/html', 'UTF-8', args['base'])
+
+	window.set_title(args['title'])
+	window.resize(args['width'], args['height'])
+	move_center(window, args['width'], args['height'])
+	window.set_border_width(0)
+	window.add(webview)
+	window.show_all()
+
+
+def play(args):
+	window = main_window(args['title'], args['width'], args['height'])
+
+	webview = create_webview()
+	webview.load_string(args['html'], 'text/html', 'UTF-8', args['base'])
+	
+	if args.has_key('x') and args.has_key('y'):
+		window.move(args['x'], args['y'])
+
+	window.add(webview)
+	window.show_all()
+	gtk.main()
+
+
+def on_open_clicked(widget, window):
+	dialog=gtk.FileChooserDialog(title="选择 Flash 文件", action=gtk.FILE_CHOOSER_ACTION_OPEN,
+		buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+	swf_filter=gtk.FileFilter()
+	swf_filter.set_name("Flash 文件(*.swf)")
+	swf_filter.add_pattern("*.[Ss][Ww][Ff]")
+	dialog.add_filter(swf_filter)
+	response = dialog.run()
+
+	if response == gtk.RESPONSE_OK:
+		filename = dialog.get_filename()
+		dialog.destroy()
+		window.remove(widget)
+		play_args = pre_play(filename)
+		display_html(window, play_args)
+	elif response == gtk.RESPONSE_CANCEL:
+		dialog.destroy()
+
+
+def open_file():
+	window = main_window('Flash Player', 550, 400)
+	window.set_border_width(170)
+	button = gtk.Button("打开文件")
+	button.connect("clicked", on_open_clicked, window)
+	window.add(button)
+	button.show()
+	window.show_all()
+	gtk.main()
+
+
+def to_html(swf):
+	html_template = """
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="UTF-8"/>
+	<style type="text/css" media="screen">
+		html,body,.flash {{
+			margin:0px;
+			padding:0px;
+			height:100%;
+			width:100%;
+			overflow:hidden;
+		}}
+		.flash{{
+			position: fixed;
+			z-index: 0;
+		}}
+		.button{{
+			position: fixed;
+			top: 0px;
+			right: 0px;
+			opacity: 0.1;
+			z-index: 1;
+		}}
+		.button:hover{{
+			background-color: buttonface;
+			border-color: buttonface;
+			opacity: 1;
+			color: black;
+		}}
+	</style>
+	<script language="javaScript">
+		function closeWindow(){{
+			window.close();
+		}}
+	</script>
+</head>
+	<object class="flash" type="application/x-shockwave-flash" width="100%" height="100%">
+		<param name="movie" value="{swf}" />
+		<param name="quality" value="high" />
+		<param name="allowFullScreen" value="true" />
+		<param name="wmode" value="transparent" />
+	</object>
+	<input class="button" type="button" value="关闭窗口" onClick="closeWindow()">
+</body>
+</html>
+"""
+	return html_template.format(swf=swf)
+
+
+def pre_play(swf):
+	play_args = {}
+	swf_abspath= os.path.abspath(swf)
+	dir_path = os.path.dirname(swf_abspath)
+	play_args['swf_file'] = os.path.basename(swf_abspath)
+	swf_info = swfheader(swf_abspath)
+	
+	play_args['width'] = swf_info['width']
+	play_args['height'] = swf_info['height']
+	play_args['base'] = 'file://'+dir_path+'/'
+	play_args['html'] = to_html(play_args['swf_file'])
+	play_args['title'] = play_args['swf_file']
+
+	opt_map = {
+		'-X': 'x',
+		'-Y': 'y',
+		'-j': 'width',
+		'-k': 'height'
+	}
+
+	for opt,arg in opts:
+		if opt in ('--hide-menubar'):
+			play_args['title'] = False
+		elif opt in ('-X', '-Y', '-j', '-k'):
+			play_args[opt_map.get(opt, 'Pass')] = int(arg)
+	return play_args
+
+
+if __name__ == "__main__":
+	try:  
+		opts,args = getopt.getopt(sys.argv[1:], "X:Y:j:k:", ["hide-menubar"])
+	except getopt.GetoptError:  
+		print("getopt error!")
+		sys.exit(1)
+
+	if len(args) <= 0:
+		open_file()
+	else:
+		play_args = pre_play(args[0])
+		play(play_args)

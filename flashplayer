@@ -1,8 +1,8 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 
-# date: 2016-10-12
-# version: 0.1.4
+# date: 2016-10-15
+# version: 0.1.5
 # author: nanpuyue <nanpuyue@gmail.com>, https://blog.nanpuyue.com
 # license: GPL 3.0, https://www.gnu.org/licenses/gpl-3.0.html
 # thanks: Kai Lautaportti, https://pypi.python.org/pypi/hexagonit.swfheader/1.2
@@ -111,13 +111,16 @@ def play(args):
 
 	webview = create_webview()
 	webview.load_string(args['html'], 'text/html', 'UTF-8', args['base'])
-	
-	if args.has_key('x') and args.has_key('y'):
+
+	if 'x' in args and 'y' in args:
 		window.move(args['x'], args['y'])
 
 	window.add(webview)
 	window.show_all()
-	gtk.main()
+
+	if 'screenshot-file' in args:
+		import gobject
+		gobject.timeout_add(1500, save_screenshot, window, args['screenshot-file'])
 
 
 def on_open_clicked(widget, window):
@@ -147,7 +150,6 @@ def open_file():
 	window.add(button)
 	button.show()
 	window.show_all()
-	gtk.main()
 
 
 def to_html(swf, button):
@@ -176,18 +178,12 @@ def to_html(swf, button):
 			z-index: 1;
 		}}
 		.button:hover{{
-			background-color: buttonface;
-			border-color: buttonface;
 			opacity: 1;
 			color: black;
 		}}
 	</style>
-	<script language="javaScript">
-		function closeWindow(){{
-			window.close();
-		}}
-	</script>
 </head>
+<body>
 	<object class="flash" type="application/x-shockwave-flash" width="100%" height="100%">
 		<param name="movie" value="{swf}" />
 		<param name="quality" value="high" />
@@ -198,7 +194,7 @@ def to_html(swf, button):
 </body>
 </html>
 """
-	close_button = '<input class="button" type="button" value="关闭窗口" onClick="closeWindow()" />'
+	close_button = '<input class="button" type="button" value="关闭窗口" onClick="window.close()" />'
 	if button == True:
 		return html_template.format(swf=swf, close_button=close_button)
 	else:
@@ -211,7 +207,7 @@ def pre_play(swf):
 	dir_path = os.path.dirname(swf_abspath)
 	play_args['swf_file'] = os.path.basename(swf_abspath)
 	swf_info = swfheader(swf_abspath)
-	
+
 	play_args['width'] = swf_info['width']
 	play_args['height'] = swf_info['height']
 	play_args['base'] = 'file://'+dir_path+'/'
@@ -227,21 +223,30 @@ def pre_play(swf):
 	for opt,arg in opts:
 		if opt in ('--hide-menubar'):
 			play_args['title'] = False
+			if 'button' not in play_args:
+				play_args['button'] = True
+		elif opt in ('--hide-button'):
+			play_args['button'] = False
+		elif opt in ('--screenshot-file'):
+			play_args['screenshot-file'] = arg
 		elif opt in ('-X', '-Y', '-j', '-k'):
 			play_args[opt_map.get(opt, 'Pass')] = int(arg)
 
-	if play_args['title'] == False:
-		play_args['html'] = to_html(play_args['swf_file'], True)
-	else:
-		play_args['html'] = to_html(play_args['swf_file'], False)
-
-
+	play_args['html'] = to_html(play_args['swf_file'], play_args.get('button', False))
 	return play_args
+
+
+def save_screenshot(window, output):
+    width, height = window.get_size()
+    pixbuf = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, False, 8, width, height)
+    screenshot = pixbuf.get_from_drawable(window.window, window.get_colormap(), 0, 0, 0, 0, width, height)
+    screenshot.save(output, 'png')
+    gtk.main_quit()
 
 
 if __name__ == "__main__":
 	try:
-		opts,args = getopt.getopt(sys.argv[1:], "X:Y:j:k:", ["hide-menubar"])
+		opts,args = getopt.getopt(sys.argv[1:], "X:Y:j:k:", ["hide-menubar", "hide-button", "screenshot-file="])
 	except getopt.GetoptError:
 		print("getopt error!")
 		sys.exit(1)
@@ -251,3 +256,5 @@ if __name__ == "__main__":
 	else:
 		play_args = pre_play(args[0])
 		play(play_args)
+
+	gtk.main()

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# date: 2016-10-15
+# version: 0.1.5
+# author: nanpuyue <nanpuyue@gmail.com>, https://blog.nanpuyue.com
+# license: GPL 3.0, https://www.gnu.org/licenses/gpl-3.0.html
+
+xvfb-run -s "-screen 0 1920x1080x24" "${0%/*}/flashplayer" "$@"

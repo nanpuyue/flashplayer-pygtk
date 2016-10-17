@@ -192,7 +192,7 @@ def to_html(swf, button):
 		<param name="movie" value="{swf}" />
 		<param name="quality" value="high" />
 		<param name="allowFullScreen" value="true" />
-		<param name="wmode" value="transparent" />
+		<param name="wmode" value="opaque" />
 	</object>
 	{close_button}
 </body>

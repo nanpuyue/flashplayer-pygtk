@@ -12,10 +12,10 @@ OPTS:
 
 Examples:
   flashplayer file.swf
-  flashplayer -hide-menubar file.swf
-  flashplayer -hide-menubar --hide-button file.swf
-  flashplayer -hide-menubar -j500 -k400 file.swf
-  flashplayer -hide-menubar -j500 -k400 -X200 -Y300 file.swf
+  flashplayer --hide-menubar file.swf
+  flashplayer --hide-menubar --hide-button file.swf
+  flashplayer --hide-menubar -j500 -k400 file.swf
+  flashplayer --hide-menubar -j500 -k400 -X200 -Y300 file.swf
 
 Usage of flash-thumbnailer (whihout displaying the main window):
   flash-thumbnailer [OPTS] --screenshot-file file.png file.swf

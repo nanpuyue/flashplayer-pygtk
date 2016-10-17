@@ -62,8 +62,12 @@ def swfheader(input):
 	return header
 
 
-def main_window(title, width, height):
-	window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+def main_window(type, title, width, height):
+	if type == 'toplevel':
+		window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+	elif type == 'popup':
+		window = gtk.Window(gtk.WINDOW_POPUP)
+
 	window.set_position(gtk.WIN_POS_CENTER)
 	window.connect('destroy', lambda x: gtk.main_quit())
 	window.set_size_request(width, height)
@@ -107,7 +111,7 @@ def display_html(window, args):
 
 
 def play(args):
-	window = main_window(args['title'], args['width'], args['height'])
+	window = main_window(args.get('window-type', 'toplevel'), args['title'], args['width'], args['height'])
 
 	webview = create_webview()
 	webview.load_string(args['html'], 'text/html', 'UTF-8', args['base'])
@@ -143,7 +147,7 @@ def on_open_clicked(widget, window):
 
 
 def open_file():
-	window = main_window('Flash Player', 550, 400)
+	window = main_window('toplevel', 'Flash Player', 550, 400)
 	window.set_border_width(170)
 	button = gtk.Button("打开文件")
 	button.connect("clicked", on_open_clicked, window)
@@ -225,6 +229,10 @@ def pre_play(swf):
 			play_args['title'] = False
 			if 'button' not in play_args:
 				play_args['button'] = True
+		elif opt in ('--window-type'):
+			play_args['window-type'] = arg
+			if 'button' not in play_args:
+				play_args['button'] = True
 		elif opt in ('--hide-button'):
 			play_args['button'] = False
 		elif opt in ('--screenshot-file'):
@@ -246,7 +254,7 @@ def save_screenshot(window, output):
 
 if __name__ == "__main__":
 	try:
-		opts,args = getopt.getopt(sys.argv[1:], "X:Y:j:k:", ["hide-menubar", "hide-button", "screenshot-file="])
+		opts,args = getopt.getopt(sys.argv[1:], "X:Y:j:k:", ["hide-menubar", "hide-button", "window-type=", "screenshot-file="])
 	except getopt.GetoptError:
 		print("getopt error!")
 		sys.exit(1)

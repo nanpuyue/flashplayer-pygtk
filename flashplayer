@@ -164,11 +164,12 @@ def to_html(swf, button):
 	<meta charset="UTF-8" />
 	<style type="text/css" media="screen">
 		html,body,.flash {{
-			margin:0px;
-			padding:0px;
-			height:100%;
-			width:100%;
-			overflow:hidden;
+			margin: 0px;
+			padding: 0px;
+			height: 100%;
+			width: 100%;
+			overflow: hidden;
+			font: 14px/24px arial;
 		}}
 		.flash{{
 			position: fixed;
@@ -185,7 +186,58 @@ def to_html(swf, button):
 			opacity: 1;
 			color: black;
 		}}
+		ul,li{{
+			margin: 0px;
+			padding: 0px;
+		}}
+		.menu{{
+			position: absolute;
+			width: 100px;
+			border-radius: 4px;
+			list-style-type: none;
+			padding-top: 5px;
+			padding-bottom: 5px;
+			background: #FFFFFF;
+		}}
+		.menu li{{
+			position: relative;
+			height: 24px;
+			text-indent: 24px;
+			vertical-align: top;
+		}}
+		.menu li:hover{{
+			background: #2CA7F8;
+		}}
+		.menu li a{{
+			display: block;
+			color: #303030;
+			text-decoration: none;
+		}}
+		.menu li:hover a{{
+			color: #FFFFFF;
+			cursor: default;
+		}}
+		.menu li a:focus{{
+			outline: none;
+		}}
 	</style>
+	<script type="text/javascript">
+		window.onload = function(){{
+			var rightMenu = document.getElementById("context-menu");
+			rightMenu.style.display = "none";
+			document.oncontextmenu = function(event){{
+				var event = event || window.event;
+				var style = rightMenu.style;
+				style.display = "block";
+				style.top = event.clientY + "px";
+				style.left = event.clientX + "px";
+				return false;
+			}};
+			document.onclick = function(){{
+				rightMenu.style.display = "none"
+			}};
+		}};
+	</script>
 </head>
 <body>
 	<object class="flash" type="application/x-shockwave-flash" width="100%" height="100%">
@@ -194,6 +246,9 @@ def to_html(swf, button):
 		<param name="allowFullScreen" value="true" />
 		<param name="wmode" value="opaque" />
 	</object>
+	<ul id="context-menu" class="menu">
+		<li><a href="javascript:window.close();">退出</a></li>
+	</ul>
 	{close_button}
 </body>
 </html>

@@ -97,9 +97,13 @@ def create_webview():
 def move_center(window, width, height):
 	screen_width = gtk.gdk.screen_width()
 	screen_height = gtk.gdk.screen_height()
-	new_x = (screen_width - width)/2
-	new_y = (screen_height - height)/2
-	window.move(new_x, new_y)
+
+	if screen_width < width or screen_height < height:
+		window.maximize()
+	else:
+		new_x = (screen_width - width)/2
+		new_y = (screen_height - height)/2
+		window.move(new_x, new_y)
 
 
 def display_html(window, args):
@@ -107,6 +111,7 @@ def display_html(window, args):
 	webview.load_string(args['html'], 'text/html', 'UTF-8', args['base'])
 
 	window.set_title(args['title'])
+	window.set_size_request(args['width']/2, args['height']/2)
 	window.resize(args['width'], args['height'])
 	move_center(window, args['width'], args['height'])
 	window.add(webview)

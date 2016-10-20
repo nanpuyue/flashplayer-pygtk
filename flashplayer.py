@@ -109,13 +109,13 @@ def display_html(window, args):
 	window.set_title(args['title'])
 	window.resize(args['width'], args['height'])
 	move_center(window, args['width'], args['height'])
-	window.set_border_width(0)
 	window.add(webview)
 	window.show_all()
 
 
 def play(args):
-	window = main_window(args.get('window-type', 'toplevel'), args['title'], args['width'], args['height'])
+	window = main_window(args.get('window-type', 'toplevel'), args['title'], args['width']/2, args['height']/2)
+	window.resize(args['width'], args['height'])
 
 	webview = create_webview()
 	webview.load_string(args['html'], 'text/html', 'UTF-8', args['base'])
@@ -131,7 +131,7 @@ def play(args):
 		gobject.timeout_add(1500, save_screenshot, window, args['screenshot-file'])
 
 
-def on_open_clicked(widget, window):
+def on_open_clicked(widget, window, box):
 	dialog=gtk.FileChooserDialog(title="选择 Flash 文件", action=gtk.FILE_CHOOSER_ACTION_OPEN,
 		buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
 	swf_filter=gtk.FileFilter()
@@ -143,7 +143,7 @@ def on_open_clicked(widget, window):
 	if response == gtk.RESPONSE_OK:
 		filename = dialog.get_filename()
 		dialog.destroy()
-		window.remove(widget)
+		window.remove(box)
 		play_args = pre_play(filename)
 		display_html(window, play_args)
 	elif response == gtk.RESPONSE_CANCEL:
@@ -152,11 +152,14 @@ def on_open_clicked(widget, window):
 
 def open_file():
 	window = main_window('toplevel', 'Flash Player', 550, 400)
-	window.set_border_width(170)
+	vbox = gtk.VBox()
+	hbox = gtk.HBox()
 	button = gtk.Button("打开文件")
-	button.connect("clicked", on_open_clicked, window)
-	window.add(button)
-	button.show()
+	button.set_size_request(200, 70)
+	button.connect("clicked", on_open_clicked, window, vbox)
+	vbox.pack_start(hbox, fill=False)
+	hbox.pack_start(button, fill=False)
+	window.add(vbox)
 	window.show_all()
 
 

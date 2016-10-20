@@ -8,6 +8,12 @@
 import pygtk; pygtk.require('2.0')
 import gtk, webkit, sys, getopt, os.path, zlib, struct
 
+try:
+	opts,args = getopt.getopt(sys.argv[1:], "X:Y:j:k:", ["hide-menubar", "hide-button", "window-type=", "screenshot-file="])
+except getopt.GetoptError:
+	print("getopt error!")
+	sys.exit(1)
+
 def swfheader(input):
 	header = {}
 	need_close = False
@@ -298,20 +304,14 @@ def pre_play(swf):
 
 
 def save_screenshot(window, output):
-    width, height = window.get_size()
-    pixbuf = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, False, 8, width, height)
-    screenshot = pixbuf.get_from_drawable(window.window, window.get_colormap(), 0, 0, 0, 0, width, height)
-    screenshot.save(output, 'png')
-    gtk.main_quit()
+	width, height = window.get_size()
+	pixbuf = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, False, 8, width, height)
+	screenshot = pixbuf.get_from_drawable(window.window, window.get_colormap(), 0, 0, 0, 0, width, height)
+	screenshot.save(output, 'png')
+	gtk.main_quit()
 
 
-if __name__ == "__main__":
-	try:
-		opts,args = getopt.getopt(sys.argv[1:], "X:Y:j:k:", ["hide-menubar", "hide-button", "window-type=", "screenshot-file="])
-	except getopt.GetoptError:
-		print("getopt error!")
-		sys.exit(1)
-
+def main():
 	if len(args) <= 0:
 		open_file()
 	else:
@@ -319,3 +319,6 @@ if __name__ == "__main__":
 		play(play_args)
 
 	gtk.main()
+
+
+main()

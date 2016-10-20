@@ -3,4 +3,10 @@
 # author: nanpuyue <nanpuyue@gmail.com>, https://blog.nanpuyue.com
 # license: GPL 3.0, https://www.gnu.org/licenses/gpl-3.0.html
 
-xvfb-run -s "-screen 0 1920x1080x24" "${0%/*}/flashplayer" "$@"
+CDIR=$(dirname $0)
+for i in flashplayer flashplayer.py; do
+  if [ -f "$CDIR/$i" ]; then
+    xvfb-run -s "-screen 0 1920x1080x24" "$CDIR/$i" "$@"
+    exit 0
+  fi
+done

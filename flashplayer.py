@@ -146,9 +146,8 @@ def on_open_clicked(widget, window, box):
 		window.remove(box)
 		play_args = pre_play(filename)
 		display_html(window, play_args)
-	elif response == gtk.RESPONSE_CANCEL:
-		dialog.destroy()
 
+	dialog.destroy()
 
 def open_file():
 	window = main_window('toplevel', 'Flash Player', 550, 400)

@@ -9,6 +9,7 @@ flashplayer.o: flashplayer.c
 	$(CC) -c $^ $(INCLUDES)
 
 flashplayer.c: flashplayer.py
+	@echo cython --embed flashplayer.py
 	@cython --embed flashplayer.py
 
 all: flashplayer

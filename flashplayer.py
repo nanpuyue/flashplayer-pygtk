@@ -174,7 +174,7 @@ def to_html(swf, button):
 <head>
 	<meta charset="UTF-8" />
 	<style type="text/css" media="screen">
-		html,body,.flash {{
+		html,body,#flash {{
 			margin: 0px;
 			padding: 0px;
 			height: 100%;
@@ -182,7 +182,7 @@ def to_html(swf, button):
 			overflow: hidden;
 			font: 14px/24px arial;
 		}}
-		.flash{{
+		#flash{{
 			position: fixed;
 			z-index: 0;
 		}}
@@ -251,13 +251,18 @@ def to_html(swf, button):
 	</script>
 </head>
 <body>
-	<object class="flash" type="application/x-shockwave-flash" width="100%" height="100%">
+	<object id="flash" type="application/x-shockwave-flash" width="100%" height="100%">
 		<param name="movie" value="{swf}" />
 		<param name="quality" value="high" />
 		<param name="allowFullScreen" value="true" />
 		<param name="wmode" value="opaque" />
 	</object>
+	<script type="text/javascript">  
+		var flash=document.getElementById("flash");
+	</script>
 	<ul id="context-menu" class="menu">
+		<li><a href="javascript:flash.Play();">播放</a></li>
+		<li><a href="javascript:flash.StopPlay();">暂停</a></li>
 		<li><a href="javascript:window.close();">退出</a></li>
 	</ul>
 	{close_button}

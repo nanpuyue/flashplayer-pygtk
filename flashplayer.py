@@ -88,7 +88,6 @@ def main_window(type, title, width, height):
 def script_action(webview, frame, target, action, ignore):
 	if target == 'window':
 		window = webview.parent
-		print(action)
 		if action == 'fullscreen':
 			window.fullscreen()
 		elif action == 'unfullscreen':
@@ -259,7 +258,6 @@ def to_html(swf, button):
 			var rightMenu = document.getElementById("context-menu");
 			rightMenu.style.display = "none";
 			document.oncontextmenu = function(event){{
-				var event = event || window.event;
 				var style = rightMenu.style;
 				style.display = "block";
 				style.top = event.clientY + "px";
@@ -267,7 +265,20 @@ def to_html(swf, button):
 				return false;
 			}};
 			document.onclick = function(){{
-				rightMenu.style.display = "none"
+				rightMenu.style.display = "none";
+			}};
+		}};
+		document.onkeydown = function(event){{
+			if(event.ctrlKey && event.keyCode == 13){{
+				if(flash.IsPlaying()){{
+					flash.StopPlay();
+				}}
+				else{{
+					flash.Play();
+				}};
+			}}
+			else if(event.keyCode == 27){{
+				prompt('window', 'unfullscreen');
 			}};
 		}};
 	</script>

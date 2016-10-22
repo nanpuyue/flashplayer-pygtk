@@ -85,9 +85,22 @@ def main_window(type, title, width, height):
 	return window
 
 
+def script_action(webview, frame, target, action, ignore):
+	if target == 'window':
+		window = webview.parent
+		print(action)
+		if action == 'fullscreen':
+			window.fullscreen()
+		elif action == 'unfullscreen':
+			window.unfullscreen()
+
+	return True
+
+
 def create_webview():
 	webview = webkit.WebView()
 	webview.connect('close-web-view', lambda x: gtk.main_quit())
+	webview.connect("script-prompt", script_action)
 	settings = webview.get_settings()
 	settings.set_property('enable_plugins', True)
 	settings.set_property('enable-scripts', True)
@@ -224,6 +237,15 @@ def to_html(swf, button):
 			color: #303030;
 			text-decoration: none;
 		}}
+		.menu hr{{
+			align: center;
+			background-color: #E1E1E1;
+			border: none;
+			height: 1px;
+			margin-top: 2px;
+			margin-bottom: 2px;
+			width: 95%;
+		}}
 		.menu li:hover a{{
 			color: #FFFFFF;
 			cursor: default;
@@ -257,12 +279,16 @@ def to_html(swf, button):
 		<param name="allowFullScreen" value="true" />
 		<param name="wmode" value="opaque" />
 	</object>
-	<script type="text/javascript">  
+	<script type="text/javascript">
 		var flash=document.getElementById("flash");
 	</script>
 	<ul id="context-menu" class="menu">
 		<li><a href="javascript:flash.Play();">播放</a></li>
 		<li><a href="javascript:flash.StopPlay();">暂停</a></li>
+		<hr/>
+		<li><a href="javascript:prompt('window', 'fullscreen');">全屏</a></li>
+		<li><a href="javascript:prompt('window', 'unfullscreen');">退出全屏</a></li>
+		<hr/>
 		<li><a href="javascript:window.close();">退出</a></li>
 	</ul>
 	{close_button}

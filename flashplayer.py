@@ -279,8 +279,14 @@ def to_html(swf, button):
 					flash.Play();
 				}};
 			}}
+			else if(event.ctrlKey && event.keyCode == 70){{
+				prompt('window', 'fullscreen');
+			}}
 			else if(event.keyCode == 27){{
 				prompt('window', 'unfullscreen');
+			}}
+			else if(event.ctrlKey && event.keyCode == 81){{
+				window.close();
 			}};
 		}};
 	</script>

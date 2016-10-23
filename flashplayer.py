@@ -215,17 +215,19 @@ def to_html(swf, button):
 		}}
 		.menu{{
 			position: absolute;
-			width: 100px;
+			width: 10em;
 			border-radius: 4px;
 			list-style-type: none;
 			padding-top: 5px;
 			padding-bottom: 5px;
 			background: #FFFFFF;
+			border:1px solid #E1E1E1;
+			box-shadow: 0px 5px 15px -5px black;
 		}}
 		.menu li{{
 			position: relative;
 			height: 24px;
-			text-indent: 24px;
+			text-indent: 2em;
 			vertical-align: top;
 		}}
 		.menu li:hover{{

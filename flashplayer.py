@@ -6,7 +6,7 @@
 # thanks: Kai Lautaportti, https://pypi.python.org/pypi/hexagonit.swfheader/1.2
 
 import pygtk; pygtk.require('2.0')
-import gtk, webkit, sys, getopt, os.path, zlib, struct
+import gtk, webkit, urllib, sys, getopt, os.path, zlib, struct
 
 try:
 	opts,args = getopt.getopt(sys.argv[1:], "X:Y:j:k:", ["hide-menubar", "hide-button", "window-type=", "screenshot-file="])
@@ -316,9 +316,9 @@ def to_html(swf, button):
 """
 	close_button = '<input class="button" type="button" value="关闭窗口" onClick="window.close()" />'
 	if button == True:
-		return html_template.format(swf=swf, close_button=close_button)
+		return html_template.format(swf=urllib.quote(swf), close_button=close_button)
 	else:
-		return html_template.format(swf=swf, close_button='')
+		return html_template.format(swf=urllib.quote(swf), close_button='')
 
 
 def pre_play(swf):
@@ -330,7 +330,7 @@ def pre_play(swf):
 
 	play_args['width'] = swf_info['width']
 	play_args['height'] = swf_info['height']
-	play_args['base'] = 'file://'+dir_path+'/'
+	play_args['base'] = 'file://' + urllib.quote(dir_path) + '/'
 	play_args['title'] = play_args['swf_file']
 
 	opt_map = {

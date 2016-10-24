@@ -171,6 +171,7 @@ def on_open_clicked(widget, window, box):
 
 	dialog.destroy()
 
+
 def open_file():
 	window = main_window('toplevel', 'Flash Player', 550, 400)
 	vbox = gtk.VBox()
@@ -197,7 +198,7 @@ def to_html(swf, button):
 			height: 100%;
 			width: 100%;
 			overflow: hidden;
-			font: 14px/24px arial;
+			font-size: 13px;
 		}}
 		#flash{{
 			position: fixed;
@@ -220,7 +221,7 @@ def to_html(swf, button):
 		}}
 		.menu{{
 			position: absolute;
-			width: 10em;
+			width: 12em;
 			border-radius: 4px;
 			list-style-type: none;
 			padding-top: 5px;
@@ -232,8 +233,9 @@ def to_html(swf, button):
 		.menu li{{
 			position: relative;
 			height: 24px;
-			text-indent: 2em;
-			vertical-align: top;
+			line-height: 24px;
+			text-indent: 1.5em;
+			vertical-align: middle;
 		}}
 		.menu li:hover{{
 			background: #2CA7F8;
@@ -244,13 +246,19 @@ def to_html(swf, button):
 			text-decoration: none;
 		}}
 		.menu hr{{
-			align: center;
 			background-color: #E1E1E1;
 			border: none;
 			height: 1px;
 			margin-top: 2px;
 			margin-bottom: 2px;
 			width: 95%;
+		}}
+		.menu span{{
+			float: right;
+			font-size: 12px;
+			margin-right: 1.5em;
+			color: #D1D1D1;
+			text-indent: 0em;
 		}}
 		.menu li:hover a{{
 			color: #FFFFFF;
@@ -307,13 +315,13 @@ def to_html(swf, button):
 		var flash=document.getElementById("flash");
 	</script>
 	<ul id="context-menu" class="menu">
-		<li><a href="javascript:flash.Play();">播放</a></li>
-		<li><a href="javascript:flash.StopPlay();">暂停</a></li>
+		<li><a href="javascript:flash.Play();">播放<span>Ctrl+Enter</span></a></li>
+		<li><a href="javascript:flash.StopPlay();">暂停<span>Ctrl+Enter</span></a></li>
 		<hr/>
-		<li><a href="#fullscreen">全屏</a></li>
-		<li><a href="#unfullscreen">退出全屏</a></li>
+		<li><a href="#fullscreen">全屏<span>Ctrl+F</span></a></li>
+		<li><a href="#unfullscreen">退出全屏<span>Esc</span></a></li>
 		<hr/>
-		<li><a href="javascript:window.close();">退出</a></li>
+		<li><a href="javascript:window.close();">退出<span>Ctrl+Q</span></a></li>
 	</ul>
 	{close_button}
 </body>

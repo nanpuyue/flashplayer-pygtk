@@ -85,21 +85,26 @@ def main_window(type, title, width, height):
 	return window
 
 
-def script_action(webview, frame, target, action, ignore):
-	if target == 'window':
-		window = webview.parent
-		if action == 'fullscreen':
-			window.fullscreen()
-		elif action == 'unfullscreen':
-			window.unfullscreen()
+def script_action(webview, frame, request, action, ignore):
+	base_uri = frame.get_uri()
+	request_uri = request.get_uri()
+	if base_uri and request_uri:
+		base_uri = base_uri.split('#')
+		request_uri = request_uri.split('#')
+		if request_uri[0] == base_uri[0]:
+			window = webview.parent
+			if request_uri[1] == 'fullscreen':
+				window.fullscreen()
+			elif request_uri[1] == 'unfullscreen':
+				window.unfullscreen()
 
-	return True
+	return False
 
 
 def create_webview():
 	webview = webkit.WebView()
 	webview.connect('close-web-view', lambda x: gtk.main_quit())
-	webview.connect("script-prompt", script_action)
+	webview.connect("navigation-policy-decision-requested", script_action)
 	settings = webview.get_settings()
 	settings.set_property('enable_plugins', True)
 	settings.set_property('enable-scripts', True)
@@ -280,10 +285,10 @@ def to_html(swf, button):
 				}};
 			}}
 			else if(event.ctrlKey && event.keyCode == 70){{
-				prompt('window', 'fullscreen');
+				window.location.replace('#fullscreen');
 			}}
 			else if(event.keyCode == 27){{
-				prompt('window', 'unfullscreen');
+				window.location.replace('#unfullscreen');
 			}}
 			else if(event.ctrlKey && event.keyCode == 81){{
 				window.close();
@@ -305,8 +310,8 @@ def to_html(swf, button):
 		<li><a href="javascript:flash.Play();">播放</a></li>
 		<li><a href="javascript:flash.StopPlay();">暂停</a></li>
 		<hr/>
-		<li><a href="javascript:prompt('window', 'fullscreen');">全屏</a></li>
-		<li><a href="javascript:prompt('window', 'unfullscreen');">退出全屏</a></li>
+		<li><a href="#fullscreen">全屏</a></li>
+		<li><a href="#unfullscreen">退出全屏</a></li>
 		<hr/>
 		<li><a href="javascript:window.close();">退出</a></li>
 	</ul>

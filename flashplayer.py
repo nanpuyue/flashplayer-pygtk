@@ -275,8 +275,21 @@ def to_html(swf, button):
 			document.oncontextmenu = function(event){{
 				var style = rightMenu.style;
 				style.display = "block";
-				style.top = event.clientY + "px";
-				style.left = event.clientX + "px";
+				var m = 15;
+				if ((event.clientX + rightMenu.clientWidth + m) > window.innerWidth) {{
+					style.left = window.innerWidth - rightMenu.clientWidth - m + "px";
+				}} else if (event.clientX < m) {{
+					style.left = m + "px";
+				}} else {{
+					style.left = event.clientX + "px";
+				}}
+				if ((event.clientY + rightMenu.clientHeight + m) > window.innerHeight) {{
+					style.top = window.innerHeight - rightMenu.clientHeight - m + "px";
+				}} else if (event.clientY < m) {{
+					style.top = m + "px";
+				}} else {{
+					style.top = event.clientY + "px";
+				}}
 				return false;
 			}};
 			document.onclick = function(){{

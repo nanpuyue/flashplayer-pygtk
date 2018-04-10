@@ -106,7 +106,7 @@ def create_webview():
 	webview.connect('close-web-view', lambda x: gtk.main_quit())
 	webview.connect("navigation-policy-decision-requested", script_action)
 	settings = webview.get_settings()
-	settings.set_property('enable_plugins', True)
+	settings.set_property('enable-plugins', True)
 	settings.set_property('enable-scripts', True)
 	return webview
 
